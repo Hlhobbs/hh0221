@@ -1,5 +1,7 @@
 package com.hh0221.DTO;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
@@ -90,8 +92,9 @@ public class RentalAgreement {
         return prediscountCharge;
     }
 
-    public void setPrediscountCharge(double prediscountCharge) {
-        this.prediscountCharge = prediscountCharge;
+    public void setPrediscountCharge(int chargeDays, double dailyRentalCharge) {
+
+        this.prediscountCharge = new BigDecimal(chargeDays * dailyRentalCharge).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
     int discountPercent;
@@ -110,8 +113,12 @@ public class RentalAgreement {
         return discountAmount;
     }
 
-    public void setDiscountAmount(double discountAmount) {
-        this.discountAmount = discountAmount;
+    public void setDiscountAmount(int discountPercent, double prediscountCharge) {
+
+        double discountPercentDecimal = (discountPercent / 100.00);
+
+        this.discountAmount = new BigDecimal(prediscountCharge * discountPercentDecimal).setScale(2, RoundingMode.HALF_UP).doubleValue();
+
     }
 
     double finalCharge;
@@ -120,14 +127,16 @@ public class RentalAgreement {
         return finalCharge;
     }
 
-    public void setFinalCharge(double finalCharge) {
-        this.finalCharge = finalCharge;
+    public void setFinalCharge(double prediscountCharge, double discountAmount) {
+
+
+        this.finalCharge = new BigDecimal(prediscountCharge - discountAmount).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
     int chargeDays;
 
     private void setChargeDays(int dayCount, LocalDate checkoutDate, boolean weekendCharge, boolean holidayCharge) {
-        LocalDate dueDate = checkoutDate.plusDays(dayCount);
+        LocalDate dateDue = checkoutDate.plusDays(dayCount);
         int unchargedDays = 0;
         MonthDay independenceDay = MonthDay.of(7, 4);
         LocalDate currentIndependenceDay = independenceDay.atYear(checkoutDate.getYear());
@@ -139,7 +148,7 @@ public class RentalAgreement {
         LocalDate september = checkoutDate.withMonth(9);
         LocalDate laborDay = september.with(firstInMonth(DayOfWeek.MONDAY));
         if (!weekendCharge) {
-            for (int i = checkoutDate.getDayOfYear(); i < dueDate.getDayOfYear(); i++){
+            for (int i = checkoutDate.getDayOfYear(); i <= dateDue.getDayOfYear(); i++){
 
                 if(checkoutDate.withDayOfYear(i).getDayOfWeek().equals(DayOfWeek.SATURDAY)){
                     unchargedDays++;
@@ -147,8 +156,9 @@ public class RentalAgreement {
                     unchargedDays++;
                 }
             }
-        }else if (!holidayCharge) {
-            for (int i = checkoutDate.getDayOfYear(); i < dueDate.getDayOfYear(); i++){
+        }
+        if (!holidayCharge) {
+            for (int i = checkoutDate.getDayOfYear(); i < dateDue.getDayOfYear(); i++){
                 if (i == currentIndependenceDay.getDayOfYear()){
                     unchargedDays++;
                 } else if (i == laborDay.getDayOfYear()){
@@ -156,7 +166,8 @@ public class RentalAgreement {
                 }
             }
         }
-
+        DateTimeFormatter formatDate = DateTimeFormatter.ofPattern("MM-dd-yy");
+        dueDate = formatDate.format(dateDue);
         chargeDays = dayCount - unchargedDays;
     }
 
@@ -178,17 +189,26 @@ public class RentalAgreement {
             setToolBrand(ladder.brand);
             setDailyRentalCharge(ladder.dailyCharge);
             setChargeDays(dayCount, convertedCheckoutDate, true, false);
+            setPrediscountCharge(chargeDays, dailyRentalCharge);
+            setDiscountAmount(discountPercent, prediscountCharge);
+            setFinalCharge(prediscountCharge, discountAmount);
         } else if (toolCode.equals("CHNS")){
             setToolType(chainsaw.toolType);
             setToolBrand(chainsaw.brand);
             setDailyRentalCharge(chainsaw.dailyCharge);
-            setChargeDays(dayCount, convertedCheckoutDate, true, false);
+            setChargeDays(dayCount, convertedCheckoutDate, false, true);
+            setPrediscountCharge(chargeDays, dailyRentalCharge);
+            setDiscountAmount(discountPercent, prediscountCharge);
+            setFinalCharge(prediscountCharge, discountAmount);
         } else if (toolCode.equals("JAKR") || toolCode.equals("JAKD")){
             jackhammer.chooseBrand(toolCode);
             setToolType(jackhammer.toolType);
             setToolBrand(jackhammer.brand);
             setDailyRentalCharge(jackhammer.dailyCharge);
-            setChargeDays(dayCount, convertedCheckoutDate, true, false);
+            setChargeDays(dayCount, convertedCheckoutDate, false, false);
+            setPrediscountCharge(chargeDays, dailyRentalCharge);
+            setDiscountAmount(discountPercent, prediscountCharge);
+            setFinalCharge(prediscountCharge, discountAmount);
         }
     }
 
