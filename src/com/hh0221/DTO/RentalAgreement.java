@@ -3,7 +3,6 @@ package com.hh0221.DTO;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
-import java.time.temporal.TemporalUnit;
 
 import static java.time.temporal.TemporalAdjusters.firstInMonth;
 
@@ -130,22 +129,40 @@ public class RentalAgreement {
     private void setChargeDays(int dayCount, LocalDate checkoutDate, boolean weekendCharge, boolean holidayCharge) {
         LocalDate dueDate = checkoutDate.plusDays(dayCount);
         int unchargedDays = 0;
-        LocalDate september = LocalDate.of(1970, 9, 1);
-        LocalDate laborDay = september.with(firstInMonth(DayOfWeek.MONDAY));
         MonthDay independenceDay = MonthDay.of(7, 4);
         LocalDate currentIndependenceDay = independenceDay.atYear(checkoutDate.getYear());
+        if(currentIndependenceDay.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+            currentIndependenceDay = currentIndependenceDay.minusDays(1);
+        }else if (currentIndependenceDay.getDayOfWeek().equals(DayOfWeek.SUNDAY)) {
+            currentIndependenceDay = currentIndependenceDay.plusDays(1);
+        }
+        LocalDate september = checkoutDate.withMonth(9);
+        LocalDate laborDay = september.with(firstInMonth(DayOfWeek.MONDAY));
         if (!weekendCharge) {
-            for (checkoutDate.getDayOfYear(); checkoutDate.getDayOfYear() < dueDate.getDayOfYear(); checkoutDate.plus(1, ChronoUnit.DAYS)){
-                if(checkoutDate.getDayOfWeek().equals(DayOfWeek.SATURDAY)){
+            for (int i = checkoutDate.getDayOfYear(); i < dueDate.getDayOfYear(); i++){
+
+                if(checkoutDate.withDayOfYear(i).getDayOfWeek().equals(DayOfWeek.SATURDAY)){
                     unchargedDays++;
-                }else if(checkoutDate.getDayOfWeek().equals(DayOfWeek.SUNDAY)){
+                }else if(checkoutDate.withDayOfYear(i).getDayOfWeek().equals(DayOfWeek.SUNDAY)){
                     unchargedDays++;
                 }
             }
         }else if (!holidayCharge) {
-            if(currentIndependenceDay.getDayOfWeek().equals(DayOfWeek.SATURDAY)) {
+            for (int i = checkoutDate.getDayOfYear(); i < dueDate.getDayOfYear(); i++){
+                if (i == currentIndependenceDay.getDayOfYear()){
+                    unchargedDays++;
+                } else if (i == laborDay.getDayOfYear()){
+                    unchargedDays++;
+                }
             }
         }
+
+        chargeDays = dayCount - unchargedDays;
+    }
+
+    public int getChargeDays() {
+
+        return chargeDays;
     }
 
     public void createRentalAgreement(String toolCode, int dayCount, int discountPercent, String checkoutDate){

@@ -16,7 +16,9 @@ public class CheckoutTest {
     public void testOne() {
         rentalAgreement.createRentalAgreement("JAKR", 5, 101, "2015-09-03");
 
-        Assert.assertEquals(rentalAgreement.getToolType(), "Jackhammer");
+        Assert.assertEquals("Jackhammer", rentalAgreement.getToolType());
+        Assert.assertEquals("Ridgid", rentalAgreement.getToolBrand());
+        Assert.assertEquals( 4, rentalAgreement.getChargeDays());
     }
 
     @Test
@@ -24,6 +26,7 @@ public class CheckoutTest {
         rentalAgreement.createRentalAgreement("LADW", 3, 10, "2020-07-02");
 
         Assert.assertEquals(rentalAgreement.getToolType(), "Ladder");
+        Assert.assertEquals( 2, rentalAgreement.getChargeDays());
     }
 
     @Test
@@ -38,6 +41,7 @@ public class CheckoutTest {
         rentalAgreement.createRentalAgreement("JAKD", 6, 0, "2015-09-03");
 
         Assert.assertEquals(rentalAgreement.getToolType(), "Jackhammer");
+        Assert.assertEquals(rentalAgreement.getToolBrand(), "DeWalt");
     }
 
     @Test
@@ -45,6 +49,8 @@ public class CheckoutTest {
         rentalAgreement.createRentalAgreement("JAKR", 9, 0, "2015-07-02");
 
         Assert.assertEquals(rentalAgreement.getToolType(), "Jackhammer");
+        Assert.assertEquals(rentalAgreement.getToolBrand(), "Ridgid");
+
     }
 
     @Test
@@ -52,5 +58,6 @@ public class CheckoutTest {
         rentalAgreement.createRentalAgreement("JAKR", 4, 50, "2020-07-02");
 
         Assert.assertEquals(rentalAgreement.getToolType(), "Jackhammer");
+        Assert.assertEquals(rentalAgreement.getToolBrand(), "Ridgid");
     }
 }
