@@ -9,13 +9,11 @@ import static java.time.temporal.TemporalAdjusters.firstInMonth;
 
 public class RentalAgreement {
 
-    Ladder ladder;
+    Ladder ladder = new Ladder();
 
-    Chainsaw chainsaw;
+    Chainsaw chainsaw = new Chainsaw();
 
-    Jackhammer ridgidJackhammer;
-
-    Jackhammer deWaltJackHammer;
+    Jackhammer jackhammer = new Jackhammer();
 
     String toolCode;
 
@@ -164,18 +162,18 @@ public class RentalAgreement {
             setDailyRentalCharge(ladder.dailyCharge);
             setChargeDays(dayCount, convertedCheckoutDate, true, false);
         } else if (toolCode.equals("CHNS")){
-            toolBrand = "Stihl";
-            toolType = "Chainsaw";
-        } else if (toolCode.equals("JAKR")){
-            toolBrand = "Ridgid";
-            toolType = "Jackhammer";
-        } else if (toolCode.equals("JAKD")){
-            toolBrand = "DeWalt";
-            toolType = "Jackhammer";
+            setToolType(chainsaw.toolType);
+            setToolBrand(chainsaw.brand);
+            setDailyRentalCharge(chainsaw.dailyCharge);
+            setChargeDays(dayCount, convertedCheckoutDate, true, false);
+        } else if (toolCode.equals("JAKR") || toolCode.equals("JAKD")){
+            jackhammer.chooseBrand(toolCode);
+            setToolType(jackhammer.toolType);
+            setToolBrand(jackhammer.brand);
+            setDailyRentalCharge(jackhammer.dailyCharge);
+            setChargeDays(dayCount, convertedCheckoutDate, true, false);
         }
     }
-
-
 
     public void printRentalAgreement() {
         System.out.println("Tool code: "+toolCode+"\nTool type: "+toolType);
