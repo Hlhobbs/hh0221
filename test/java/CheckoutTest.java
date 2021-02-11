@@ -1,71 +1,68 @@
 import com.hh0221.DTO.RentalAgreement;
-import org.junit.Assert;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import java.text.ParseException;
+
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 public class CheckoutTest {
 
     private RentalAgreement rentalAgreement;
 
     @BeforeEach
-    public void setUp() throws Exception {
+    public void setUp() {
         rentalAgreement = new RentalAgreement();
     }
 
     @Test
-    public void testOne() {
-        rentalAgreement.createRentalAgreement("JAKR", 5, 101, "2015-09-03");
-
-        Assert.assertEquals("Jackhammer", rentalAgreement.getToolType());
-        Assert.assertEquals("Ridgid", rentalAgreement.getToolBrand());
-        Assert.assertEquals( 2, rentalAgreement.getChargeDays());
-        Assertions.assertEquals( 5.98, rentalAgreement.getPrediscountCharge());
-        Assertions.assertEquals( 6.04, rentalAgreement.getDiscountAmount());
-        Assertions.assertEquals( -0.06, rentalAgreement.getFinalCharge());
+    public void testOneThrowsException() {
+        NumberFormatException discountException = assertThrows(NumberFormatException.class, () -> rentalAgreement.createRentalAgreement("JAKR", 5, 101, "09/03/2015"));
+        Assertions.assertTrue(discountException.getMessage().contains("The discount percentage must be between 0 and 100!"));
     }
 
     @Test
-    public void testTwo() {
-        rentalAgreement.createRentalAgreement("LADW", 3, 10, "2020-07-02");
+    public void testTwo() throws ParseException {
+        rentalAgreement.createRentalAgreement("LADW", 3, 10, "07/02/2020");
 
-        Assert.assertEquals(rentalAgreement.getToolType(), "Ladder");
-        Assert.assertEquals( 2, rentalAgreement.getChargeDays());
+        Assertions.assertEquals(rentalAgreement.getToolType(), "Ladder");
+        Assertions.assertEquals( 2, rentalAgreement.getChargeDays());
         Assertions.assertEquals( 3.98, rentalAgreement.getPrediscountCharge());
         Assertions.assertEquals( .4, rentalAgreement.getDiscountAmount());
         Assertions.assertEquals( 3.58, rentalAgreement.getFinalCharge());
     }
 
     @Test
-    public void testThree() {
-        rentalAgreement.createRentalAgreement("CHNS", 5, 25, "2015-07-02");
+    public void testThree() throws ParseException {
+        rentalAgreement.createRentalAgreement("CHNS", 5, 25, "07/02/2015");
 
-        Assert.assertEquals(rentalAgreement.getToolType(), "Chainsaw");
-        Assert.assertEquals( 3, rentalAgreement.getChargeDays());
+        Assertions.assertEquals(rentalAgreement.getToolType(), "Chainsaw");
+        Assertions.assertEquals( 3, rentalAgreement.getChargeDays());
         Assertions.assertEquals( 4.47, rentalAgreement.getPrediscountCharge());
         Assertions.assertEquals( 1.12, rentalAgreement.getDiscountAmount());
         Assertions.assertEquals( 3.35, rentalAgreement.getFinalCharge());
     }
 
     @Test
-    public void testFour() {
-        rentalAgreement.createRentalAgreement("JAKD", 6, 0, "2015-09-03");
+    public void testFour() throws ParseException {
+        rentalAgreement.createRentalAgreement("JAKD", 6, 0, "09/03/2015");
 
-        Assert.assertEquals(rentalAgreement.getToolType(), "Jackhammer");
-        Assert.assertEquals(rentalAgreement.getToolBrand(), "DeWalt");
-        Assert.assertEquals( 3, rentalAgreement.getChargeDays());
+        Assertions.assertEquals(rentalAgreement.getToolType(), "Jackhammer");
+        Assertions.assertEquals(rentalAgreement.getToolBrand(), "DeWalt");
+        Assertions.assertEquals( 3, rentalAgreement.getChargeDays());
         Assertions.assertEquals( 8.97, rentalAgreement.getPrediscountCharge());
         Assertions.assertEquals( 0.0, rentalAgreement.getDiscountAmount());
         Assertions.assertEquals( 8.97, rentalAgreement.getFinalCharge());
     }
 
     @Test
-    public void testFive() {
-        rentalAgreement.createRentalAgreement("JAKR", 9, 0, "2015-07-02");
+    public void testFive() throws ParseException {
+        rentalAgreement.createRentalAgreement("JAKR", 9, 0, "07/02/2015");
 
-        Assert.assertEquals(rentalAgreement.getToolType(), "Jackhammer");
-        Assert.assertEquals(rentalAgreement.getToolBrand(), "Ridgid");
-        Assert.assertEquals( 5, rentalAgreement.getChargeDays());
+        Assertions.assertEquals(rentalAgreement.getToolType(), "Jackhammer");
+        Assertions.assertEquals(rentalAgreement.getToolBrand(), "Ridgid");
+        Assertions.assertEquals( 5, rentalAgreement.getChargeDays());
         Assertions.assertEquals( 14.95, rentalAgreement.getPrediscountCharge());
         Assertions.assertEquals( 0.0, rentalAgreement.getDiscountAmount());
         Assertions.assertEquals( 14.95, rentalAgreement.getFinalCharge());
@@ -73,12 +70,12 @@ public class CheckoutTest {
     }
 
     @Test
-    public void testSix() {
-        rentalAgreement.createRentalAgreement("JAKR", 4, 50, "2020-07-02");
+    public void testSix() throws ParseException {
+        rentalAgreement.createRentalAgreement("JAKR", 4, 50, "07/02/2020");
 
-        Assert.assertEquals(rentalAgreement.getToolType(), "Jackhammer");
-        Assert.assertEquals(rentalAgreement.getToolBrand(), "Ridgid");
-        Assert.assertEquals( 1, rentalAgreement.getChargeDays());
+        Assertions.assertEquals(rentalAgreement.getToolType(), "Jackhammer");
+        Assertions.assertEquals(rentalAgreement.getToolBrand(), "Ridgid");
+        Assertions.assertEquals( 1, rentalAgreement.getChargeDays());
         Assertions.assertEquals( 2.99, rentalAgreement.getPrediscountCharge());
         Assertions.assertEquals( 1.50, rentalAgreement.getDiscountAmount());
         Assertions.assertEquals( 1.49, rentalAgreement.getFinalCharge());

@@ -18,14 +18,13 @@ public class Jackhammer extends Tool {
 
     }
 
-    public String chooseBrand(String toolCode) {
-        if (toolCode == toolCodeRidgid){
+    public void chooseBrand(String toolCode) {
+        if (toolCode.equals(toolCodeRidgid)){
             brand = brandRidgid;
 
-        }else if (toolCode == toolCodeDeWalt){
+        }else if (toolCode.equals(toolCodeDeWalt)){
             brand = brandDeWalt;
         }
 
-        return brand;
-    };
+    }
 }
