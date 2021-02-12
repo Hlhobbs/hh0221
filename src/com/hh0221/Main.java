@@ -8,7 +8,7 @@ public class Main {
 
     public static void main(String[] args) throws ParseException {
         CheckoutController checkout = new CheckoutController();
-        checkout.Checkout();
+        checkout.checkout();
 
     }
 }

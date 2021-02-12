@@ -1,4 +1,4 @@
-package com.hh0221.DTO;
+package com.hh0221.Model;
 
 public class Jackhammer extends Tool {
 

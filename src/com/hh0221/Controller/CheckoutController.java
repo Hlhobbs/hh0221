@@ -1,27 +1,36 @@
 package com.hh0221.Controller;
 
-import com.hh0221.DTO.RentalAgreement;
-
-import java.text.ParseException;
+import java.util.Arrays;
 import java.util.InputMismatchException;
 import java.util.Locale;
-import java.util.Scanner;
 import java.util.regex.Matcher;
+import java.text.ParseException;
 import java.util.regex.Pattern;
+import com.hh0221.Model.RentalAgreement;
+import com.hh0221.Model.UserInputException;
+
+import java.util.Scanner;
+
 
 public class CheckoutController {
 
+    private final String[] toolCodes = {"LADW", "CHNS", "JAKR", "JAKD"};
+    private final UserInputException userInputException = new UserInputException();
+    private final Scanner scanner = new Scanner(System.in);
+    private final RentalAgreement agreement = new RentalAgreement();
 
 
-    public void Checkout() throws ParseException {
-        Scanner scanner = new Scanner(System.in);
-        String printAgreement;
-        RentalAgreement agreement = new RentalAgreement();
+    //calls the input functions below to get the user's input,
+    // then inserts then into the function that creates the rental agreement,
+    // and either calls a function to print the agreement,
+    // or closes and ends the program depending on the user's choice
+    public void checkout() throws ParseException {
         String toolCode = inputToolCode(scanner);
         int rentalDays = inputRentalDays(scanner);
         int discountPercent = inputDiscountPercentage(scanner);
         String checkoutDate = inputCheckoutDate(scanner);
         agreement.createRentalAgreement(toolCode, rentalDays, discountPercent, checkoutDate);
+        String printAgreement;
         do {
             System.out.println("Do you wish to print out your rental agreement?");
             printAgreement = scanner.next().toLowerCase(Locale.ROOT);
@@ -36,71 +45,67 @@ public class CheckoutController {
     }
 
 
-    private String inputToolCode(Scanner s) {
+    private String inputToolCode(Scanner scanner) {
         String toolCode;
         do {
             System.out.println("Please enter the tool code of the tool you wish to rent:");
-            toolCode = s.next().toUpperCase(Locale.ROOT);
-            if (!toolCode.equals("LADW") && !toolCode.equals("CHNS") && !toolCode.equals("JAKR") && !toolCode.equals("JAKD")) {
+            toolCode = scanner.next().toUpperCase(Locale.ROOT);
+            if (!Arrays.asList(toolCodes).contains(toolCode)) {
                 System.out.println("That is not a code of a tool we have available. Please try again!");
             }
-        } while (!toolCode.equals("LADW") && !toolCode.equals("CHNS") && !toolCode.equals("JAKR") && !toolCode.equals("JAKD"));
+        } while (!Arrays.asList(toolCodes).contains(toolCode));
         return toolCode;
     }
 
-    private int inputRentalDays(Scanner s) {
+    private int inputRentalDays(Scanner scanner) {
         int rentalDays = 0;
         boolean isInt = false;
         do {
             try{
                 System.out.println("Please enter how many days you wish to rent this tool:");
-                rentalDays = s.nextInt();
-                if (rentalDays < 1){
-                    throw new NumberFormatException("The number you have given is less than 1, please enter a number greater than or equal to 1!");
-                }else
-                    isInt = true;
+                rentalDays = scanner.nextInt();
+                userInputException.RentalDaysException(rentalDays);
+                isInt = true;
             }catch (InputMismatchException e) {
-                s.next();
+                scanner.next();
                 System.out.println("Please enter a number!");
             }
         }while (!isInt);
         return rentalDays;
     }
 
-    private int inputDiscountPercentage(Scanner s){
+    private int inputDiscountPercentage(Scanner scanner){
         int discount = 0;
         boolean isInt = false;
         do {
             try{
                 System.out.println("Please enter what percentage of a discount you would like to apply:");
-                discount = s.nextInt();
-                if (discount < 0 || discount > 100){
-                    throw new NumberFormatException("The discount percentage must be between 0 and 100!");
-                }else
-                    isInt = true;
+                discount = scanner.nextInt();
+                userInputException.DiscountPercentException(discount);
+                isInt = true;
             }catch (InputMismatchException e) {
-                s.next();
+                scanner.next();
                 System.out.println("Please enter a number!");
             }
         }while (!isInt);
         return discount;
     }
 
-    private String inputCheckoutDate(Scanner s){
+    private String inputCheckoutDate(Scanner scanner){
         final String regex = "[0-9]{2}[/,'-][0-9]{2}[/,'-][0-9]{4}";
         final Pattern pattern = Pattern.compile(regex, Pattern.MULTILINE);
         String checkoutDate;
         Matcher matcher;
         do {
             System.out.println("Please enter today's date (MM/DD/YYYY):");
-            checkoutDate = s.next();
+            checkoutDate = scanner.next();
             matcher = pattern.matcher(checkoutDate);
             if (checkoutDate.contains("-")){
                 checkoutDate = checkoutDate.replaceAll("-", "/");
                 matcher = pattern.matcher(checkoutDate);
             }
             if (!matcher.matches()) {
-                s.next();
+                scanner.next();
                 System.out.println("Please enter today's date in a valid format!");
             }
         }while (!matcher.matches());

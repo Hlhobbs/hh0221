@@ -1,30 +1,32 @@
-package com.hh0221.DTO;
+package com.hh0221.Model;
 
 import java.math.BigDecimal;
-import java.math.RoundingMode;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.*;
 import java.time.format.DateTimeFormatter;
 import static java.time.temporal.TemporalAdjusters.firstInMonth;
+import java.text.ParseException;
+import java.math.RoundingMode;
+import java.text.SimpleDateFormat;
+import java.time.*;
 
 public class RentalAgreement {
 
+    private final UserInputException userInputException = new UserInputException();
+
     static final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("MM/dd/yy");
 
-    Ladder ladder = new Ladder();
+    private final Ladder ladder = new Ladder();
 
-    Chainsaw chainsaw = new Chainsaw();
+    private final Chainsaw chainsaw = new Chainsaw();
 
-    Jackhammer jackhammer = new Jackhammer();
+    private final Jackhammer jackhammer = new Jackhammer();
 
-    String toolCode;
+    private String toolCode;
 
     public void setToolCode(String toolCode) {
         this.toolCode = toolCode;
     }
 
-    String toolType;
+    private String toolType;
 
     public String getToolType() {
         return toolType;
@@ -34,7 +36,7 @@ public class RentalAgreement {
         this.toolType = toolType;
     }
 
-    String toolBrand;
+    private String toolBrand;
 
     public String getToolBrand() {
         return toolBrand;
@@ -44,19 +46,19 @@ public class RentalAgreement {
         this.toolBrand = toolBrand;
     }
 
-    int rentalDays;
+    private int rentalDays;
 
     public void setRentalDays(int rentalDays) {
         this.rentalDays = rentalDays;
     }
 
-    String checkoutDate;
+    private String checkoutDate;
 
     public void setCheckoutDate(String checkoutDate) {
         this.checkoutDate = checkoutDate;
     }
 
-    String dueDate;
+    private String dueDate;
 
     public String getDueDate() {
         return dueDate;
@@ -68,13 +70,13 @@ public class RentalAgreement {
         this.dueDate = dateDue.format(formattedDueDate);
     }
 
-    double dailyRentalCharge;
+    private double dailyRentalCharge;
 
     public void setDailyRentalCharge(double dailyRentalCharge) {
         this.dailyRentalCharge = dailyRentalCharge;
     }
 
-    double prediscountCharge;
+    private double prediscountCharge;
 
     public double getPrediscountCharge() {
         return prediscountCharge;
@@ -85,13 +87,13 @@ public class RentalAgreement {
         this.prediscountCharge = new BigDecimal(chargeDays * dailyRentalCharge).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
-    int discountPercent;
+    private int discountPercent;
 
     public void setDiscountPercent(int discountPercent) {
         this.discountPercent = discountPercent;
     }
 
-    double discountAmount;
+    private double discountAmount;
 
     public double getDiscountAmount() {
         return discountAmount;
@@ -105,7 +107,7 @@ public class RentalAgreement {
 
     }
 
-    double finalCharge;
+    private double finalCharge;
 
     public double getFinalCharge() {
         return finalCharge;
@@ -117,8 +119,10 @@ public class RentalAgreement {
         this.finalCharge = new BigDecimal(prediscountCharge - discountAmount).setScale(2, RoundingMode.HALF_UP).doubleValue();
     }
 
-    int chargeDays;
+    private int chargeDays;
 
+    //Takes the amount of days the user wants to rent the tool, and the day they rented the tool,
+    // and calculates how many days they will actually be charged based on which tool they rented
     private void setChargeDays(int rentalDays, String checkoutDate, boolean weekendCharge, boolean holidayCharge) {
         LocalDate convertedCheckoutDate = convertStringToDate(checkoutDate);
 
@@ -134,19 +138,15 @@ public class RentalAgreement {
         LocalDate laborDay = september.with(firstInMonth(DayOfWeek.MONDAY));
         if (!weekendCharge) {
             for (int i = convertedCheckoutDate.getDayOfYear(); i <= LocalDate.parse(dueDate, formatter).getDayOfYear(); i++){
-
-                if(convertedCheckoutDate.withDayOfYear(i).getDayOfWeek().equals(DayOfWeek.SATURDAY)){
-                    unchargedDays++;
-                }else if(convertedCheckoutDate.withDayOfYear(i).getDayOfWeek().equals(DayOfWeek.SUNDAY)){
+                DayOfWeek day = convertedCheckoutDate.withDayOfYear(i).getDayOfWeek();
+                if(day.equals(DayOfWeek.SATURDAY) || day.equals((DayOfWeek.SUNDAY))){
                     unchargedDays++;
                 }
             }
         }
         if (!holidayCharge) {
             for (int i = convertedCheckoutDate.getDayOfYear(); i < LocalDate.parse(dueDate, formatter).getDayOfYear(); i++){
-                if (i == currentIndependenceDay.getDayOfYear()){
-                    unchargedDays++;
-                } else if (i == laborDay.getDayOfYear()){
+                if (i == currentIndependenceDay.getDayOfYear() || i == laborDay.getDayOfYear()){
                     unchargedDays++;
                 }
             }
@@ -159,12 +159,11 @@ public class RentalAgreement {
         return chargeDays;
     }
 
+    //Using the inputs the user gave, this assigns their agreement the pre-defined variables of the tool they asked for,
+    //and also calls the necessary functions to calculate the variables that can't be defined without user input (e.g. how many days they will be charged, the final charge sum)
     public void createRentalAgreement(String toolCode, int dayCount, int discountPercent, String rawCheckoutDate) throws ParseException {
-        if (dayCount < 1){
-            throw new NumberFormatException("The number you have given is less than 1, please enter a number greater than or equal to 1!");
-        }else if (discountPercent < 0 || discountPercent > 100){
-            throw new NumberFormatException("The discount percentage must be between 0 and 100!");
-        }
+        userInputException.RentalDaysException(dayCount);
+        userInputException.DiscountPercentException(discountPercent);
         setToolCode(toolCode);
         setDiscountPercent(discountPercent);
         setRentalDays(dayCount);
@@ -207,13 +206,14 @@ public class RentalAgreement {
         }
     }
 
+    //Prints out the rental agreement to the user in the CLI, tabulated to present in a more uniform way
     public void printRentalAgreement() {
-        System.out.println("Tool code: "+toolCode+"\nTool type: "+toolType+
-                "\nTool brand: "+toolBrand+"\nAmount of days renting: "+rentalDays+
-                "\nDate tool was rented: "+checkoutDate+"\nDate tool must be returned: "+dueDate+
-                "\nAmount owed per day: $"+dailyRentalCharge+"\nAmount of days where charged will be incurred: "+chargeDays+
-                "\nTotal charge before discount: $"+prediscountCharge+"\nDiscount Percent: "+discountPercent+
-                "%\nTotal discount amount: $"+discountAmount+"\nFinal charge: $"+finalCharge);
+        System.out.println("Tool code:\t\t\t\t\t"+toolCode+"\nTool type:\t\t\t\t\t"+toolType+
+                "\nTool brand:\t\t\t\t\t"+toolBrand+"\nAmount of days renting:\t\t\t\t"+rentalDays+
+                "\nDate tool was rented:\t\t\t\t"+checkoutDate+"\nDate tool must be returned:\t\t\t"+dueDate+
+                "\nAmount owed per day:\t\t\t\t$"+dailyRentalCharge+"\nAmount of days where charged will be incurred:\t"+chargeDays+
+                "\nTotal charge before discount:\t\t\t$"+prediscountCharge+"\nDiscount Percent:\t\t\t\t"+discountPercent+
+                "%\nTotal discount amount:\t\t\t\t$"+discountAmount+"\nFinal charge:\t\t\t\t\t$"+finalCharge);
     }
 
     private LocalDate convertStringToDate(String date){
